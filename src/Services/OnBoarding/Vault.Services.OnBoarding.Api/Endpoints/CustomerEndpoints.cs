@@ -8,14 +8,15 @@ namespace Vault.Services.OnBoarding.Api.Endpoints
     {
         public static IEndpointRouteBuilder MapCustomers(this IEndpointRouteBuilder endpoints)
         {
-            var group = endpoints.MapGroup("/customers").WithTags("Customers");
+            var group = endpoints.MapGroup("/customers");
 
             group.MapPost("/", async ([FromBody] CreateCustomerProfileCommand command, ISender sender, CancellationToken ct) =>
             {
                 var response = await sender.Send(command, ct);
                 return Results.Created($"/customers/{response.Id}", response);
             })
-            .WithName("CreateCustomer").WithSummary("Create a new customer").Produces(StatusCodes.Status201Created).Produces(StatusCodes.Status400BadRequest);
+            .WithTags("Customers").WithName("CreateCustomer").WithSummary("Create a new customer")
+            .Produces(StatusCodes.Status201Created).Produces(StatusCodes.Status400BadRequest);
 
             return endpoints;
         }

@@ -6,14 +6,9 @@ using Vault.Services.OnBoarding.Domain.Exceptions;
 namespace Vault.Services.OnBoarding.Api.Middlewares
 {
     /// <summary>Turns every unhandled exception into an RFC 9457 ProblemDetails response.</summary>
-    internal sealed class GlobalExceptionHandler(
-        IProblemDetailsService problemDetailsService,
-        ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+    internal sealed class GlobalExceptionHandler(IProblemDetailsService problemDetailsService, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
     {
-        public async ValueTask<bool> TryHandleAsync(
-            HttpContext httpContext,
-            Exception exception,
-            CancellationToken cancellationToken)
+        public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
             var known = exception as BaseException;
             var status = known?.StatusCode ?? StatusCodes.Status500InternalServerError;
