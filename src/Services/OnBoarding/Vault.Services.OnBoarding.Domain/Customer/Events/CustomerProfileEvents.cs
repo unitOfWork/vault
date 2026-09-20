@@ -1,4 +1,4 @@
-﻿using Vault.Services.OnBoarding.Domain.Abstractions;
+﻿using Vault.Services.OnBoarding.Domain.Common;
 
 namespace Vault.Services.OnBoarding.Domain.Customer.Events
 {

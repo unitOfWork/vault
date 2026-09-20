@@ -1,4 +1,4 @@
-﻿using Vault.Services.OnBoarding.Domain.Abstractions;
+﻿using Vault.Services.OnBoarding.Domain.Common;
 using Vault.Services.OnBoarding.Domain.Customer.Enums;
 using Vault.Services.OnBoarding.Domain.Customer.Events;
 using Vault.Services.OnBoarding.Domain.Exceptions;
