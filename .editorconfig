@@ -1,53 +1,116 @@
-﻿## Vault — banned APIs (Microsoft.CodeAnalysis.BannedApiAnalyzers, RS0030)
-##
-## Format:  <prefix>:<symbol-id>;<message>
-##   T:  type          M:  method          P:  property         F:  field
-##
-## These are the highest-value rules in the repo. No style rule can catch what
-## is on this list, and every entry maps to a specific way a ledger loses money.
+root = true
 
-## ── Floating point in monetary code ──────────────────────────────────────────
-## Section 5: "an account's balance must always equal the sum of all its
-## transactions". That invariant is arithmetically impossible in binary floating
-## point — 0.1 + 0.2 != 0.3. Use decimal, or an integer minor-unit type.
-T:System.Double;Use decimal for monetary amounts. Binary floating point cannot represent decimal fractions exactly and will break the balance invariant.
-T:System.Single;Use decimal for monetary amounts.
-M:System.Math.Round(System.Double,System.Int32);Use Math.Round(decimal, int, MidpointRounding) with an explicit rounding mode.
+# All files
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
 
-## ── Ambient time ─────────────────────────────────────────────────────────────
-## Statement periods (6.7) and standing-order schedules (6.5) are date-boundary
-## logic. Ambient time makes them untestable and makes behaviour depend on the
-## pod's timezone.
-P:System.DateTime.Now;Inject TimeProvider. Ambient local time is untestable and timezone-dependent.
-P:System.DateTime.UtcNow;Inject TimeProvider (TimeProvider.GetUtcNow) so schedules and statement boundaries are testable.
-P:System.DateTime.Today;Inject TimeProvider.
-P:System.DateTimeOffset.Now;Inject TimeProvider.
-P:System.DateTimeOffset.UtcNow;Inject TimeProvider.
+# Project, config and data files
+[*.{csproj,props,targets,slnx,xml,json,yml,yaml}]
+indent_size = 2
 
-## ── Non-deterministic identity ───────────────────────────────────────────────
-## Ordering matters for ledger reads. Guid.NewGuid() is random and fragments
-## clustered indexes; prefer a sequential UUID (v7) behind an abstraction.
-M:System.Guid.NewGuid;Inject IIdGenerator (UUIDv7) — sequential ids keep index locality and make tests deterministic.
+[*.md]
+trim_trailing_whitespace = false
 
-## ── Insecure randomness ──────────────────────────────────────────────────────
-T:System.Random;Use RandomNumberGenerator for anything user-visible: account numbers, references, tokens, OTPs.
+# C# files
+[*.cs]
 
-## ── Blocking on async ────────────────────────────────────────────────────────
-## Thread-pool starvation under load, and a deadlock risk that only shows up
-## in production.
-P:System.Threading.Tasks.Task`1.Result;Await the task.
-M:System.Threading.Tasks.Task.Wait;Await the task.
-M:System.Threading.Thread.Sleep(System.Int32);Use await Task.Delay(..., cancellationToken).
+#### Layout ####
+max_line_length = 180
+csharp_new_line_before_open_brace = all
+csharp_new_line_before_else = true
+csharp_new_line_before_catch = true
+csharp_new_line_before_finally = true
+csharp_indent_case_contents = true
+csharp_indent_switch_labels = true
 
-## ── Culture-dependent conversions ────────────────────────────────────────────
-## An amount parsed under a different locale reads 1,234.56 as 1.23456.
-M:System.Decimal.Parse(System.String);Pass CultureInfo.InvariantCulture explicitly.
-M:System.Double.Parse(System.String);Use decimal, with InvariantCulture.
-M:System.DateTime.Parse(System.String);Pass CultureInfo.InvariantCulture and an explicit format.
+#### Usings & namespaces ####
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+csharp_using_directive_placement = outside_namespace:warning
+csharp_style_namespace_declarations = file_scoped:warning
+dotnet_style_namespace_match_folder = true
+dotnet_diagnostic.IDE0130.severity = warning # namespace must match folder
+dotnet_diagnostic.IDE0005.severity = warning # remove unnecessary usings
+dotnet_diagnostic.CA1716.severity = none # VB keywords completely ignored
 
-## ── Service location ─────────────────────────────────────────────────────────
-## Hides dependencies from the constructor and defers failure to runtime.
-T:System.IServiceProvider;Inject dependencies via the constructor. Permitted only inside DI registration lambdas — suppress locally with a justification.
+#### Language preferences ####
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+dotnet_style_predefined_type_for_locals_parameters_members = true:warning
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+dotnet_style_readonly_field = true:warning
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:warning
+csharp_prefer_braces = true:warning
+csharp_style_prefer_primary_constructors = true:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion
+dotnet_style_prefer_collection_expression = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+dotnet_style_null_propagation = true:suggestion
 
-## ── Console output ───────────────────────────────────────────────────────────
-T:System.Console;Use ILogger. Console output bypasses structured logging and correlation ids.
+# Too noisy in practice
+dotnet_diagnostic.IDE0058.severity = none # expression value is never used
+dotnet_diagnostic.IDE0008.severity = none # use explicit type instead of var
+
+#### Naming ####
+# Interfaces: IName
+dotnet_naming_rule.interfaces_start_with_i.symbols = interface_symbols
+dotnet_naming_rule.interfaces_start_with_i.style = i_prefix_pascal
+dotnet_naming_rule.interfaces_start_with_i.severity = warning
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_style.i_prefix_pascal.required_prefix = I
+dotnet_naming_style.i_prefix_pascal.capitalization = pascal_case
+
+# Types and non-field members: PascalCase
+dotnet_naming_rule.types_and_members_pascal.symbols = types_and_members
+dotnet_naming_rule.types_and_members_pascal.style = pascal
+dotnet_naming_rule.types_and_members_pascal.severity = warning
+dotnet_naming_symbols.types_and_members.applicable_kinds = class, struct, enum, delegate, method, property, event
+dotnet_naming_style.pascal.capitalization = pascal_case
+
+# Constants: PascalCase (placed before the private-field rule so it takes precedence)
+dotnet_naming_rule.constants_pascal.symbols = constants
+dotnet_naming_rule.constants_pascal.style = pascal
+dotnet_naming_rule.constants_pascal.severity = warning
+dotnet_naming_symbols.constants.applicable_kinds = field
+dotnet_naming_symbols.constants.required_modifiers = const
+
+# Private fields: _camelCase
+dotnet_naming_rule.private_fields_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_underscore.style = underscore_camel
+dotnet_naming_rule.private_fields_underscore.severity = warning
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.underscore_camel.required_prefix = _
+dotnet_naming_style.underscore_camel.capitalization = camel_case
+
+# Parameters and locals: camelCase
+dotnet_naming_rule.params_locals_camel.symbols = params_locals
+dotnet_naming_rule.params_locals_camel.style = camel
+dotnet_naming_rule.params_locals_camel.severity = warning
+dotnet_naming_symbols.params_locals.applicable_kinds = parameter, local
+dotnet_naming_style.camel.capitalization = camel_case
+
+#### Analyzer rules worth enforcing ####
+dotnet_diagnostic.CA2007.severity = none    # ConfigureAwait: not needed in ASP.NET Core
+dotnet_diagnostic.CA1848.severity = suggestion # LoggerMessage delegates: nice, not mandatory
+dotnet_diagnostic.CA2016.severity = warning # forward CancellationToken
+dotnet_diagnostic.CA1062.severity = none    # null checks: covered by nullable reference types
+
+# Test projects: allow underscores in test method names (Method_State_Result)
+[tests/**.cs]
+dotnet_diagnostic.CA1707.severity = none
+
+# EF Core migrations are generated code: style and analyzer rules don't apply.
+[src/Ras.Infrastructure/Persistence/Data/Migrations/**.cs]
+generated_code = true
