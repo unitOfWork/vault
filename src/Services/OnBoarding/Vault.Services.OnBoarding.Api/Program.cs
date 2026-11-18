@@ -1,16 +1,14 @@
-﻿using Vault.Services.OnBoarding.Api.Endpoints;
+﻿using Vault.Services.OnBoarding.Api;
+using Vault.Services.OnBoarding.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenApi();
+builder.Services
+    .AddApi()
+    .AddApplication();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
-
-app.MapCustomerEndpoints();
+app.UseApi();
 
 app.Run();

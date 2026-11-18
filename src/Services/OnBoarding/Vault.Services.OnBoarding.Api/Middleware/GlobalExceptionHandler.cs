@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Diagnostics;
-using Vault.Services.OnBoarding.Application.Common.Exceptions;
 
 namespace Vault.Services.OnBoarding.Api.Middleware;
 
@@ -13,13 +12,6 @@ public sealed partial class GlobalExceptionHandler(ILogger<GlobalExceptionHandle
         if (exception is OperationCanceledException && httpContext.RequestAborted.IsCancellationRequested)
         {
             LogRequestAborted(httpContext.Request.Method, httpContext.Request.Path);
-            return true;
-        }
-
-        if (exception is ConflictException conflict)
-        {
-            LogConflict(conflict.Error.Code);
-            await conflict.Error.ToProblem().ExecuteAsync(httpContext);
             return true;
         }
 

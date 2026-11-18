@@ -1,5 +1,8 @@
 ﻿using MediatR;
+using Vault.Services.OnBoarding.Api.Middleware;
 using Vault.Services.OnBoarding.Api.Models;
+using Vault.Services.OnBoarding.Application.Features.Customers.Commands.CreateCustomerProfile;
+using Vault.Services.OnBoarding.Application.Features.Customers.Models;
 
 namespace Vault.Services.OnBoarding.Api.Endpoints;
 
