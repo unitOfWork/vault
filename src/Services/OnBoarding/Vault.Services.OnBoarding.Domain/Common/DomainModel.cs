@@ -1,4 +1,4 @@
-﻿namespace Vault.Services.OnBoarding.Domain.Abstractions
+﻿namespace Vault.Services.OnBoarding.Domain.Common
 {
     /// <summary>Base class for domain models : (Entity Id). Equality is by identity, not by value.</summary>
     public abstract class DomainModel<TId> : IEquatable<DomainModel<TId>> where TId : struct
