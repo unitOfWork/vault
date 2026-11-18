@@ -4,18 +4,9 @@ using Vault.Services.OnBoarding.Domain.Customer.Enums;
 namespace Vault.Services.OnBoarding.Domain.Customer
 {
     /// <summary>Customer profile : Register(), MarkPending(), MarkVerified(), MarkRejected()</summary>
-    public sealed class CustomerProfile : DomainModel<Guid>
+    public sealed class CustomerProfile : Entity
     {
-        private CustomerProfile() { }   // EF
-
-        private CustomerProfile(Guid id, Guid userId, string firstName, string lastName, DateOnly dateOfBirth) : base(id)
-        {
-            UserId = userId;
-            FirstName = firstName;
-            LastName = lastName;
-            DateOfBirth = dateOfBirth;
-            KycStatus = KycState.Unverified;
-        }
+        private CustomerProfile() { }
 
         public Guid UserId { get; private set; }
         public string FirstName { get; private set; }
@@ -24,10 +15,17 @@ namespace Vault.Services.OnBoarding.Domain.Customer
         public KycState KycStatus { get; private set; }
         public DateTimeOffset? VerifiedAt { get; private set; }
 
-        /// <summary>Registers a new, unverified customer profile.</summary>
-        public static CustomerProfile Register(Guid userId, string firstName, string lastName, DateOnly dateOfBirth, DateTimeOffset now, int minimumAge)
+        /// <summary>Creates a new, unverified customer profile.</summary>
+        public static CustomerProfile Create(Guid userId, string firstName, string lastName, DateOnly dateOfBirth)
         {
-            return new CustomerProfile(Guid.CreateVersion7(), userId, firstName.Trim(), lastName.Trim(), dateOfBirth);
+            return new CustomerProfile
+            {
+                UserId = userId,
+                FirstName = firstName.Trim(),
+                LastName = lastName.Trim(),
+                DateOfBirth = dateOfBirth,
+                KycStatus = KycState.Unverified
+            };
         }
 
         /// <summary>Submits the profile for KYC review.</summary>
